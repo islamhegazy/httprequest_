@@ -1,70 +1,61 @@
-import React, {Component} from 'react';
-import axios from 'axios';
+import React, {Component, Suspense} from 'react';
+import {Route, Link, NavLink, Switch, Redirect} from "react-router-dom";
+import classes from "../Blog/Blog.css"
 
-import Post from '../../components/Post/Post';
-import FullPost from '../../components/FullPost/FullPost';
-import NewPost from '../../components/NewPost/NewPost';
-import classes from '../Blog/Blog.css';
+import asyncComponent from "../../hoc/asyncComponent"
+//import NewPost from './NewPost/NewPost';
+const AsyncNewPOst = asyncComponent(() => {
+    return import ('./NewPost/NewPost');
+});
+const Posts = React.lazy(() => import ('./Posts/Posts'));
 class Blog extends Component {
     state = {
-        posts: [],
-        selectedPostId: null,
-        error: false
-
+        auth: true
     }
-    componentDidMount() {
-        axios
-            .get(`/posts`)
-            .then(response => {
-                const posts = response
-                    .data
-                    .slice(0, 4);
-                const updatePosts = posts.map(post => {
-                    return {
-                        ...post,
-                        author: 'Max'
-                    }
-                })
-                this.setState({posts: updatePosts})
-            })
-            .catch(error => {
-                // console.log(error)
-                this.setState({error: true})
-            })
-    };
-    postClickedHandeler = (id) => {
-        this.setState({selectedPostId: id})
-    }
-
     render() {
-        let posts = !this.state.error
-            ? this
-                .state
-                .posts
-                .map(post => {
-                    return <Post
-                        title={post.title}
-                        key={post.id}
-                        author={post.author}
-                        clicked={() => this.postClickedHandeler(post.id)}/>
-                })
-            : <p>some thing wemt wrong</p>
-
         return (
             <div className={classes.Blog}>
-                <h1>Blog Component</h1>
-                <section className={classes.Posts}>
-                    {posts}
-                </section>
-                <section>
-                    <FullPost id_Blog_Com={this.state.selectedPostId}/>
-                </section>
-                <section>
-                    <NewPost/>
-                </section>
+                <header>
+                    <nav>
+                        <ul>
+                            <li>
+                                {/*NavLink for default active class and we can
+                                use activeClassName for change the name of class */}
+                                <NavLink
+                                    to="/posts/"
+                                    exact
+                                    activeClassName="Blog__active__1Ib_J"
+                                    activeStyle={{
+                                    color: '#fa924f',
+                                    textDecoration: 'underline'
+                                }}>Home</NavLink>
+                            </li>
+                            <li>
+                                <NavLink
+                                    activeClassName="Blog__active__1Ib_J"
+                                    to={{
+                                    pathname: '/new-post',
+                                    hash: '#submit',
+                                    search: '?quick-submit=true'
+                                }}>New post</NavLink>
+                            </li>
+                        </ul>
+                    </nav>
+                </header>
+                {/*Switch allow to run one Route ,
+                and the order is important when using switch */}
+                <Switch>
+                    {this.state.auth
+                        ? <Route path="/new-post" component={AsyncNewPOst}/>
+                        : null}
+                    {/*route paramter */}
+                    <Route
+                        path="/posts"
+                        render={() => <Suspense fallback={<div> Loading....</div>}> <Posts/></Suspense>}/> {/*to catch any rout not found */}
+                    <Route render={() => <h1>Not found</h1>}/> {/* <Redirect from="/" to="/posts"/> */}
+                </Switch>
             </div>
         );
     }
 }
-
 export default Blog;

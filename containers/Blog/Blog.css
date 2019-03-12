@@ -4,10 +4,20 @@
     margin: 20px;
     text-align: center;
 }
-.Posts {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    width: 80%;
-    margin: auto;
+
+
+.Blog ul{
+    list-style: none;
 }
+.Blog ul li {
+   display: inline-block;
+   margin: 0 20px;
+}
+.Blog ul li a{
+    text-decoration: none;
+ }
+ .Blog ul li a:hover,
+ .Blog ul li a:active,
+ .Blog a.active{
+    color: #fa923f
+ }
